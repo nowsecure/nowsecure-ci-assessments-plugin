@@ -124,7 +124,8 @@ public class NowSecurePlugin extends Builder implements SimpleBuildStep {
         }
     }
 
-    @Symbol("greet")
+    // should be a plugin-unique camel-cased identifier used by workflows
+    @Symbol("assessment")
     @Extension
     public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
 
