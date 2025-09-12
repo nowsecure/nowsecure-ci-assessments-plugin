@@ -26,7 +26,6 @@ import java.util.Collections;
 import java.util.Optional;
 import jenkins.model.Jenkins;
 import jenkins.tasks.SimpleBuildStep;
-import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
@@ -35,7 +34,6 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
-@Getter
 public class NowSecurePlugin extends Builder implements SimpleBuildStep {
 
     // Required
