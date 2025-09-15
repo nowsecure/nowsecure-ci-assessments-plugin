@@ -63,12 +63,11 @@ public class NowSecurePlugin extends Builder implements SimpleBuildStep {
     }
 
     private Optional<StringCredentials> getCredentials(String credentialsId) {
-        // TODO: Update to lookupCredentialsInGroup
         return CredentialsMatchers.filter(
-                        CredentialsProvider.lookupCredentials(
+                        CredentialsProvider.lookupCredentialsInItemGroup(
                                 StringCredentials.class,
                                 Jenkins.get(),
-                                hudson.security.ACL.SYSTEM,
+                                hudson.security.ACL.SYSTEM2,
                                 Collections.<DomainRequirement>emptyList()),
                         CredentialsMatchers.withId(credentialsId))
                 .stream()
@@ -90,16 +89,21 @@ public class NowSecurePlugin extends Builder implements SimpleBuildStep {
         }
 
         if (optionalCredentials.isEmpty()) {
-            listener.error("Could not find a StringCredential matching the specified credentialId");
+            listener.error("Could not find a TextCredential matching the specified credentialId");
             run.setResult(hudson.model.Result.FAILURE);
             return;
         }
 
-        final var token = optionalCredentials.get().getSecret().getPlainText();
+        // According to docs, this is our responsibility to do for credential tracking:
+        // https://github.com/jenkinsci/credentials-plugin/blob/master/docs/consumer.adoc#track-usage-of-a-credential-against-specific-jenkins-context-objects
+        final var credential = optionalCredentials.get();
+        CredentialsProvider.track(run, credential);
+
+        final var token = credential.getSecret().getPlainText();
 
         final var tool = new NowSecureBinary(arch, osName, workspace)
                 .addArgument("run")
-                .addArgument("file", binaryFile.toURI().toString())
+                .addArgument("file", binaryFile.toURI().getPath())
                 .addArgument("--group-ref", group)
                 .addArgument("--api-host", apiHost)
                 .addArgument("--ui-host", uiHost)

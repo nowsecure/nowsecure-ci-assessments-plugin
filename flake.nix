@@ -30,7 +30,7 @@
             ];
 
             # Environment variables
-            env = { };
+            env = { JAVA_HOME="${pkgs.jdk17}"; };
           };
         };
       }
