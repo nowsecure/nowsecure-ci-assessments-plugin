@@ -1,0 +1,51 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:c="/lib/credentials" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+
+    <f:entry field="tokenCredentialId" title="${%Credentials}">
+        <c:select expressionAllowed="true"/>
+    </f:entry>
+
+    <f:entry title="Binary File Path" field="binaryFilePath" description="${%BinaryFilePathDesc}">
+        <f:textbox />
+    </f:entry>
+    <f:entry title="Group Ref" field="group">
+        <f:textbox />
+    </f:entry>
+    <f:advanced>
+        <f:entry title="Artifact Directory" field="artifactDir" description="${%ArtifactDirDesc}">
+            <f:textbox />
+        </f:entry>
+        <f:entry title="API Host" field="apiHost" description="${%APIHostDesc}">
+            <f:textbox />
+        </f:entry>
+        <f:entry title="UI Host" field="uiHost" description="${%UIHostDesc}">
+            <f:textbox />
+        </f:entry>
+        <f:entry title="Minimum Score" field="minimumScore" description="${%MinimumScoreDesc}">
+            <f:textbox />
+        </f:entry>
+        <f:entry title="${%Polling Duration (Minutes)}" field="pollingDurationMinutes" description="${%PollingDurationDesc}">
+            <f:textbox />
+        </f:entry>
+        <f:entry title="${%Log Level}" field="logLevel" description="${%LogLevelDesc}">
+            <select name="logLevel">
+                <option value="debug"
+                    selected="${instance.logLevel.equals('debug')? 'true':null}">Debug</option>
+                <option value="info"
+                    selected="${instance.logLevel.equals('info')? 'true':null}">Info</option>
+                <option value="warn"
+                    selected="${instance.logLevel.equals('warn')? 'true':null}">Warn</option>
+                <option value="error"
+                    selected="${instance.logLevel.equals('error')? 'true':null}">Error</option>
+            </select>
+        </f:entry>
+        <f:entry title="${%Analysis Type}" field="analysisType">
+            <select name="analysisType">
+                <option value="static"
+                    selected="${instance.analysisType.equals('static')? 'true':null}">Static</option>
+                <option value="full"
+                    selected="${instance.analysisType.equals('full')? 'true':null}">Full</option>
+            </select>
+        </f:entry>
+    </f:advanced>
+</j:jelly>
