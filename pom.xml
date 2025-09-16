@@ -10,11 +10,12 @@
   </parent>
 
   <groupId>com.nowsecure.plugin</groupId>
-  <artifactId>ci-assessments</artifactId>
+  <artifactId>nowsecure-ci-assessments</artifactId>
   <version>${revision}${changelist}</version>
   <packaging>hpi</packaging>
 
   <name>NowSecure CI Assessments</name>
+  <description>NowSecure provides purpose-built, fully automated mobile application security testing (static and dynamic) for your development pipeline</description>
   <url>https://github.com/nowsecure/nowsecure-jenkins-ci-plugin</url>
   <licenses>
     <license>

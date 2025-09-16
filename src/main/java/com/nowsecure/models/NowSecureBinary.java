@@ -3,7 +3,6 @@ package com.nowsecure.models;
 import hudson.FilePath;
 import hudson.model.TaskListener;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.LinkedList;
@@ -61,11 +60,6 @@ public class NowSecureBinary {
         }
         this.toolPath.chmod(0755);
         this.arguments.add(this.toolPath.getRemote());
-    }
-
-    public FilePath getFilePath() {
-        return new FilePath(new File(
-                NowSecureBinary.class.getClassLoader().getResource("./").getPath()));
     }
 
     public NowSecureBinary addArgument(String flag) {
