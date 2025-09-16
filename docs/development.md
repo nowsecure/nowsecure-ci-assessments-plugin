@@ -36,5 +36,5 @@ This is a standard Jenkins plugin built with Java and Maven.
 To run the full suite run the command: 
 
 ```bash
-mvn test
+mvn clean test
 ```
