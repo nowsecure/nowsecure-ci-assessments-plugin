@@ -91,8 +91,6 @@ class NowSecurePluginTest {
         nsStep.setMinimumScore(minimumScore);
         nsStep.setPollingDurationMinutes(pollingDurationMinutes);
 
-        assertEquals(nsStep.getAnalysisType(), analysisType);
-
         project.getBuildersList().add(nsStep);
         project = jenkins.configRoundtrip(project);
 

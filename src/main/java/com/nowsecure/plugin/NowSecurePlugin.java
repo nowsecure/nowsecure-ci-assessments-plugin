@@ -115,10 +115,9 @@ public class NowSecurePlugin extends Builder implements SimpleBuildStep {
                 .addArgument("--minimum-score", String.valueOf(minimumScore))
                 .addArgument("--poll-for-minutes", String.valueOf(pollingDurationMinutes))
                 .addArgument("--ci-environment", "jenkins")
-                .addArgument("--token", token);
+                .addToken(token);
 
-        final var process = tool.startWithListener(listener);
-        final var exitCode = process.waitFor();
+        final var exitCode = tool.startProc(launcher, listener).join();
 
         if (exitCode != 0) {
             listener.getLogger().println("Exit Code: " + exitCode);

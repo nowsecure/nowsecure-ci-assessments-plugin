@@ -1,16 +1,19 @@
 package com.nowsecure.models;
 
 import hudson.FilePath;
+import hudson.Launcher;
+import hudson.Launcher.ProcStarter;
 import hudson.model.TaskListener;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.LinkedList;
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 
 public class NowSecureBinary {
-    List<String> arguments;
+    List<String> arguments = new LinkedList<>();
+    List<Boolean> masks = new LinkedList<>();
     FilePath toolPath;
+    FilePath workspace;
     String toolName;
 
     protected static String getToolName(String arch, String osName) throws IllegalArgumentException {
@@ -54,47 +57,53 @@ public class NowSecureBinary {
     public NowSecureBinary(String arch, String osName, FilePath workspace) throws InterruptedException, IOException {
         this.toolName = NowSecureBinary.getToolName(arch, osName);
         this.toolPath = workspace.child(toolName);
-        this.arguments = new LinkedList<>();
+        this.workspace = workspace;
         try (var inputStream = NowSecureBinary.class.getClassLoader().getResourceAsStream(this.toolName)) {
             this.toolPath.copyFrom(inputStream);
         }
         this.toolPath.chmod(0755);
+
         this.arguments.add(this.toolPath.getRemote());
+        this.masks.add(false);
     }
 
     public NowSecureBinary addArgument(String flag) {
         this.arguments.add(flag);
+        this.masks.add(false);
         return this;
     }
 
     public NowSecureBinary addArgument(String flag, String value) {
-        this.arguments.addAll(List.of(flag, value));
+        if (value != null && !StringUtils.isBlank(value)) {
+            this.arguments.addAll(List.of(flag, value));
+            this.masks.add(false);
+            this.masks.add(false);
+        }
         return this;
     }
 
-    public Process startWithListener(TaskListener listener) throws IOException {
-        var process = this.start();
-
-        var outputReader = new Thread(() -> {
-            try (var reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    listener.getLogger().println(line);
-                }
-            } catch (java.io.IOException e) {
-                e.printStackTrace(listener.error("Error reading process output."));
-            }
-        });
-
-        outputReader.start();
-
-        return process;
+    public NowSecureBinary addToken(String value) {
+        if (value != null && !StringUtils.isBlank(value)) {
+            this.arguments.addAll(List.of("--token", value));
+            this.masks.add(false);
+            this.masks.add(true);
+        }
+        return this;
     }
 
-    protected Process start() throws IOException {
-        return new ProcessBuilder()
-                .redirectErrorStream(true)
-                .command(this.arguments)
-                .start();
+    public ProcStarter startProc(Launcher launcher, TaskListener listener) throws IOException {
+        listener.getLogger().println("Mask size: " + this.masks.size());
+        listener.getLogger().println("Arguments size: " + this.arguments.size());
+        boolean[] maskArray = new boolean[this.masks.size()];
+        for (int i = 0; i < this.masks.size(); i++) {
+            maskArray[i] = this.masks.get(i).booleanValue();
+        }
+
+        var pstarter = launcher.launch();
+        return pstarter.cmds(this.arguments)
+                .masks(maskArray)
+                .pwd(this.workspace)
+                .stdout(listener)
+                .stderr(listener.getLogger());
     }
 }
