@@ -6,6 +6,8 @@ import com.cloudbees.plugins.credentials.common.StandardCredentials;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import com.nowsecure.models.NowSecureBinary;
+
+import hudson.AbortException;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
@@ -83,15 +85,17 @@ public class NowSecurePlugin extends Builder implements SimpleBuildStep {
         final var optionalCredentials = getCredentials(tokenCredentialId);
 
         if (!binaryFile.exists()) {
-            listener.error("Cannot find binary file at path: %s", binaryFile.toURI());
+            var errorMessage = String.format("Cannot find binary file at path: %s", binaryFile.toURI());
+            listener.error(errorMessage);
             run.setResult(hudson.model.Result.FAILURE);
-            return;
+            throw new AbortException(errorMessage);
         }
 
         if (optionalCredentials.isEmpty()) {
-            listener.error("Could not find a TextCredential matching the specified credentialId");
+            var errorMessage = "Could not find a TextCredential matching the specified credentialId";
+            listener.error(errorMessage);
             run.setResult(hudson.model.Result.FAILURE);
-            return;
+            throw new AbortException(errorMessage);
         }
 
         // According to docs, this is our responsibility to do for credential tracking:
@@ -122,11 +126,12 @@ public class NowSecurePlugin extends Builder implements SimpleBuildStep {
         if (exitCode != 0) {
             listener.getLogger().println("Exit Code: " + exitCode);
             run.setResult(hudson.model.Result.FAILURE);
+            throw new AbortException("NowSecure binary finished with nonzero exit code");
         }
     }
 
     // should be a plugin-unique camel-cased identifier used by workflows
-    @Symbol("assessment")
+    @Symbol("nowsecureAssessment")
     @Extension
     public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
 
@@ -194,7 +199,7 @@ public class NowSecurePlugin extends Builder implements SimpleBuildStep {
                     return result.includeCurrentValue(tokenCredentialId);
                 }
             } else {
-                if (!item.hasPermission(Item.EXTENDED_READ) && !item.hasPermission(CredentialsProvider.USE_ITEM)) {
+                if (!item.hasPermission(Item.EXTENDED_READ)) {
                     return result.includeCurrentValue(tokenCredentialId);
                 }
             }
