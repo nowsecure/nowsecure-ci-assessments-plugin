@@ -11,7 +11,8 @@ import org.apache.commons.lang3.StringUtils;
 
 public class NowSecureBinary {
     List<String> arguments = new LinkedList<>();
-    List<Boolean> masks = new LinkedList<>();
+    // Refers to the index of the arguments list that should be masked
+    List<Integer> maskedIndices = new LinkedList<>();
     FilePath toolPath;
     FilePath workspace;
     String toolName;
@@ -64,20 +65,16 @@ public class NowSecureBinary {
         this.toolPath.chmod(0755);
 
         this.arguments.add(this.toolPath.getRemote());
-        this.masks.add(false);
     }
 
     public NowSecureBinary addArgument(String flag) {
         this.arguments.add(flag);
-        this.masks.add(false);
         return this;
     }
 
     public NowSecureBinary addArgument(String flag, String value) {
         if (value != null && !StringUtils.isBlank(value)) {
             this.arguments.addAll(List.of(flag, value));
-            this.masks.add(false);
-            this.masks.add(false);
         }
         return this;
     }
@@ -85,23 +82,28 @@ public class NowSecureBinary {
     public NowSecureBinary addToken(String value) {
         if (value != null && !StringUtils.isBlank(value)) {
             this.arguments.addAll(List.of("--token", value));
-            this.masks.add(false);
-            this.masks.add(true);
+            this.maskedIndices.add(this.arguments.size() - 1);
         }
         return this;
     }
 
-    public ProcStarter startProc(Launcher launcher, TaskListener listener) throws IOException {
-        listener.getLogger().println("Mask size: " + this.masks.size());
-        listener.getLogger().println("Arguments size: " + this.arguments.size());
-        boolean[] maskArray = new boolean[this.masks.size()];
-        for (int i = 0; i < this.masks.size(); i++) {
-            maskArray[i] = this.masks.get(i).booleanValue();
+    private boolean[] createMaskedArray() {
+        boolean[] maskArray = new boolean[this.arguments.size()];
+        for (int i = 0; i < maskedIndices.size(); i++) {
+            maskArray[maskedIndices.get(i)] = true;
         }
+        return maskArray;
+    }
 
-        var pstarter = launcher.launch();
-        return pstarter.cmds(this.arguments)
-                .masks(maskArray)
+    public ProcStarter startProc(Launcher launcher, TaskListener listener) throws IOException {
+        listener.getLogger().println("Argument size: " + this.arguments.size());
+        listener.getLogger().println("Mask Index" + this.maskedIndices);
+
+        var masks = createMaskedArray();
+        listener.getLogger().println("Masked size: " + masks.length);
+        return launcher.launch()
+                .cmds(this.arguments)
+                .masks(masks)
                 .pwd(this.workspace)
                 .stdout(listener)
                 .stderr(listener.getLogger());

@@ -45,6 +45,20 @@ class NowSecureBinaryTests {
     }
 
     @Test
+    void shouldTrackTokenIndeces() throws Exception {
+        var resourceDir = this.getClass().getClassLoader().getResource("./");
+        var nsb = new NowSecureBinary(arch, osName, new FilePath(new File(resourceDir.getPath())));
+        Assertions.assertEquals(List.of(), nsb.maskedIndices, "Initial masked indeces list should be empty");
+
+        nsb.addArgument("some-argument").addToken("some-token").addArgument("double", "argument");
+        Assertions.assertEquals(List.of(3), nsb.maskedIndices);
+
+        nsb.addToken("new-token");
+        Assertions.assertEquals(List.of(3, 7), nsb.maskedIndices);
+        Assertions.assertEquals(nsb.arguments.size(), 8);
+    }
+
+    @Test
     void shouldAddToolPathToProcessArgumentList() throws Exception {
         var resourceDir = this.getClass().getClassLoader().getResource("./");
         var nsb = new NowSecureBinary(arch, osName, new FilePath(new File(resourceDir.getPath())));
