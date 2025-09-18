@@ -5,6 +5,8 @@ import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardCredentials;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
+import com.nowsecure.models.AnalysisType;
+import com.nowsecure.models.LogLevel;
 import com.nowsecure.models.NowSecureBinary;
 
 import hudson.AbortException;
@@ -28,6 +30,7 @@ import java.util.Collections;
 import java.util.Optional;
 import jenkins.model.Jenkins;
 import jenkins.tasks.SimpleBuildStep;
+
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
@@ -37,7 +40,6 @@ import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
 public class NowSecurePlugin extends Builder implements SimpleBuildStep {
-
     // Required
     private final String binaryFilePath;
     private final String group;
@@ -51,8 +53,8 @@ public class NowSecurePlugin extends Builder implements SimpleBuildStep {
     private String uiHost = "https://app.nowsecure.com";
     private String nowsecureCIVersion;
 
-    private String logLevel = "info";
-    private String analysisType = "static";
+    private LogLevel logLevel = LogLevel.INFO;
+    private AnalysisType analysisType = AnalysisType.STATIC;
 
     private int minimumScore = -1;
     private int pollingDurationMinutes = 20;
@@ -215,19 +217,13 @@ public class NowSecurePlugin extends Builder implements SimpleBuildStep {
     }
 
     @DataBoundSetter
-    public void setAnalysisType(String analysisType) {
-        var fixed = Util.fixEmptyAndTrim(analysisType).toLowerCase();
-        if ("static".equals(fixed) || "full".equals(fixed)) {
-            this.analysisType = analysisType;
-        }
+    public void setAnalysisType(AnalysisType analysisType) {
+        this.analysisType = analysisType;
     }
 
     @DataBoundSetter
-    public void setLogLevel(String logLevel) {
-        var fixed = Util.fixEmptyAndTrim(logLevel).toLowerCase();
-        if ("error".equals(fixed) || "warn".equals(fixed) || "info".equals(fixed) || "debug".equals(fixed)) {
-            this.logLevel = logLevel;
-        }
+    public void setLogLevel(LogLevel logLevel) {
+        this.logLevel = logLevel;
     }
 
     @DataBoundSetter
@@ -269,47 +265,48 @@ public class NowSecurePlugin extends Builder implements SimpleBuildStep {
         this.pollingDurationMinutes = pollingDurationMinutes;
     }
 
-    public String getBinaryFilePath() {
-        return binaryFilePath;
-    }
+	public String getBinaryFilePath() {
+		return binaryFilePath;
+	}
 
-    public String getGroup() {
-        return group;
-    }
+	public String getGroup() {
+		return group;
+	}
 
-    public String getTokenCredentialId() {
-        return tokenCredentialId;
-    }
+	public String getTokenCredentialId() {
+		return tokenCredentialId;
+	}
 
-    public String getAnalysisType() {
-        return analysisType;
-    }
+	public String getArtifactDir() {
+		return artifactDir;
+	}
 
-    public String getArtifactDir() {
-        return artifactDir;
-    }
+	public String getApiHost() {
+		return apiHost;
+	}
 
-    public String getApiHost() {
-        return apiHost;
-    }
+	public String getUiHost() {
+		return uiHost;
+	}
 
-    public String getUiHost() {
-        return uiHost;
-    }
+	public String getNowsecureCIVersion() {
+		return nowsecureCIVersion;
+	}
 
-    public String getNowsecureCIVersion() {
-        return nowsecureCIVersion;
-    }
+	public LogLevel getLogLevel() {
+		return logLevel;
+	}
 
-    public String getLogLevel() {
-        return logLevel;
-    }
+	public AnalysisType getAnalysisType() {
+		return analysisType;
+	}
 
-    public int getMinimumScore() {
-        return minimumScore;
-    }
+	public int getMinimumScore() {
+		return minimumScore;
+	}
 
-    public int getPollingDurationMinutes() {
-        return pollingDurationMinutes;
-    }
+	public int getPollingDurationMinutes() {
+		return pollingDurationMinutes;
+	}
+
 }
