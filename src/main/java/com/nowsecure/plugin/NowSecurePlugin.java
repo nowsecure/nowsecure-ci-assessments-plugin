@@ -211,7 +211,7 @@ public class NowSecurePlugin extends Builder implements SimpleBuildStep {
 
     @DataBoundSetter
     public void setAnalysisType(String analysisType) {
-        var fixed = Util.fixEmptyAndTrim(analysisType).toLowerCase();
+        var fixed = StringUtils.trimToEmpty(analysisType).toLowerCase();
         if ("static".equals(fixed) || "full".equals(fixed)) {
             this.analysisType = analysisType;
         }
@@ -219,7 +219,7 @@ public class NowSecurePlugin extends Builder implements SimpleBuildStep {
 
     @DataBoundSetter
     public void setLogLevel(String logLevel) {
-        var fixed = Util.fixEmptyAndTrim(logLevel).toLowerCase();
+        var fixed = StringUtils.trimToEmpty(logLevel).toLowerCase();
         if ("error".equals(fixed) || "warn".equals(fixed) || "info".equals(fixed) || "debug".equals(fixed)) {
             this.logLevel = logLevel;
         }
