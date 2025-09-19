@@ -30,7 +30,7 @@ import java.util.Collections;
 import java.util.Optional;
 import jenkins.model.Jenkins;
 import jenkins.tasks.SimpleBuildStep;
-
+import org.kohsuke.stapler.verb.POST;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
@@ -192,7 +192,8 @@ public class NowSecurePlugin extends Builder implements SimpleBuildStep {
             return FormValidation.ok();
         }
 
-        // Has to be of the form 'doFill<FieldName>Items'
+
+        @POST // Has to be of the form 'doFill<FieldName>Items'
         public ListBoxModel doFillTokenCredentialIdItems(
                 @AncestorInPath Item item, @QueryParameter String tokenCredentialId) {
             StandardListBoxModel result = new StandardListBoxModel();
