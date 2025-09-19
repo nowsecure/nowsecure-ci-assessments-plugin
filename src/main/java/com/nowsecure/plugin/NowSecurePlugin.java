@@ -5,13 +5,12 @@ import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardCredentials;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
-import com.nowsecure.models.AnalysisType;
-import com.nowsecure.models.LogLevel;
 import com.nowsecure.models.NowSecureBinary;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
+import hudson.Util;
 import hudson.model.AbstractProject;
 import hudson.model.Item;
 import hudson.model.Run;
@@ -22,6 +21,7 @@ import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.Collections;
 import java.util.Optional;
 import jenkins.model.Jenkins;
@@ -49,17 +49,17 @@ public class NowSecurePlugin extends Builder implements SimpleBuildStep {
     private String uiHost = "https://app.nowsecure.com";
     private String nowsecureCIVersion;
 
-    private LogLevel logLevel = LogLevel.INFO;
-    private AnalysisType analysisType = AnalysisType.STATIC;
+    private String logLevel = "info";
+    private String analysisType = "static";
 
     private int minimumScore = -1;
     private int pollingDurationMinutes = 20;
 
     @DataBoundConstructor
     public NowSecurePlugin(String binaryFilePath, String group, String tokenCredentialId) {
-        this.binaryFilePath = binaryFilePath;
-        this.group = group;
-        this.tokenCredentialId = tokenCredentialId;
+        this.binaryFilePath = Util.fixEmptyAndTrim(binaryFilePath);
+        this.group = Util.fixEmptyAndTrim(group);
+        this.tokenCredentialId = Util.fixEmptyAndTrim(tokenCredentialId);
     }
 
     private Optional<StringCredentials> getCredentials(String credentialsId) {
@@ -115,10 +115,9 @@ public class NowSecurePlugin extends Builder implements SimpleBuildStep {
                 .addArgument("--minimum-score", String.valueOf(minimumScore))
                 .addArgument("--poll-for-minutes", String.valueOf(pollingDurationMinutes))
                 .addArgument("--ci-environment", "jenkins")
-                .addArgument("--token", token);
+                .addToken(token);
 
-        final var process = tool.startWithListener(listener);
-        final var exitCode = process.waitFor();
+        final var exitCode = tool.startProc(launcher, listener).join();
 
         if (exitCode != 0) {
             listener.getLogger().println("Exit Code: " + exitCode);
@@ -164,6 +163,28 @@ public class NowSecurePlugin extends Builder implements SimpleBuildStep {
             return FormValidation.ok();
         }
 
+        public FormValidation doCheckApiHost(@QueryParameter String apiHost) {
+            if (!StringUtils.isBlank(apiHost)) {
+                try {
+                    new URI(apiHost).toURL();
+                } catch (Exception e) {
+                    return FormValidation.error("Cannot be converted to a valid URL");
+                }
+            }
+            return FormValidation.ok();
+        }
+
+        public FormValidation doCheckUiHost(@QueryParameter String uiHost) {
+            if (!StringUtils.isBlank(uiHost)) {
+                try {
+                    new URI(uiHost).toURL();
+                } catch (Exception e) {
+                    return FormValidation.error("Cannot be converted to a valid URL");
+                }
+            }
+            return FormValidation.ok();
+        }
+
         // Has to be of the form 'doFill<FieldName>Items'
         public ListBoxModel doFillTokenCredentialIdItems(
                 @AncestorInPath Item item, @QueryParameter String tokenCredentialId) {
@@ -190,27 +211,42 @@ public class NowSecurePlugin extends Builder implements SimpleBuildStep {
 
     @DataBoundSetter
     public void setAnalysisType(String analysisType) {
-        this.analysisType = AnalysisType.from(analysisType);
+        var fixed = StringUtils.trimToEmpty(analysisType).toLowerCase();
+        if ("static".equals(fixed) || "full".equals(fixed)) {
+            this.analysisType = analysisType;
+        }
     }
 
     @DataBoundSetter
     public void setLogLevel(String logLevel) {
-        this.logLevel = LogLevel.from(logLevel);
+        var fixed = StringUtils.trimToEmpty(logLevel).toLowerCase();
+        if ("error".equals(fixed) || "warn".equals(fixed) || "info".equals(fixed) || "debug".equals(fixed)) {
+            this.logLevel = logLevel;
+        }
     }
 
     @DataBoundSetter
     public void setArtifactDir(String artifactDir) {
-        this.artifactDir = artifactDir;
+        var fixed = Util.fixEmptyAndTrim(artifactDir);
+        if (fixed != null) {
+            this.artifactDir = fixed;
+        }
     }
 
     @DataBoundSetter
     public void setApiHost(String apiHost) {
-        this.apiHost = apiHost;
+        var fixed = Util.fixEmptyAndTrim(apiHost);
+        if (fixed != null) {
+            this.apiHost = fixed;
+        }
     }
 
     @DataBoundSetter
     public void setUiHost(String uiHost) {
-        this.uiHost = uiHost;
+        var fixed = Util.fixEmptyAndTrim(uiHost);
+        if (fixed != null) {
+            this.uiHost = fixed;
+        }
     }
 
     @DataBoundSetter
@@ -240,7 +276,7 @@ public class NowSecurePlugin extends Builder implements SimpleBuildStep {
         return tokenCredentialId;
     }
 
-    public AnalysisType getAnalysisType() {
+    public String getAnalysisType() {
         return analysisType;
     }
 
@@ -260,7 +296,7 @@ public class NowSecurePlugin extends Builder implements SimpleBuildStep {
         return nowsecureCIVersion;
     }
 
-    public LogLevel getLogLevel() {
+    public String getLogLevel() {
         return logLevel;
     }
 
