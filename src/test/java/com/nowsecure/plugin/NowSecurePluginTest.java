@@ -8,7 +8,6 @@ import com.cloudbees.plugins.credentials.CredentialsStore;
 import com.cloudbees.plugins.credentials.domains.Domain;
 import com.nowsecure.models.AnalysisType;
 import com.nowsecure.models.LogLevel;
-
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
 import hudson.util.FormValidation;

@@ -15,5 +15,4 @@ public enum LogLevel {
     public String getDescription() {
         return description;
     }
-
 }
