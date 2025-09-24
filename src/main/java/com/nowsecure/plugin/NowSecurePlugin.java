@@ -8,7 +8,6 @@ import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import com.nowsecure.models.AnalysisType;
 import com.nowsecure.models.LogLevel;
 import com.nowsecure.models.NowSecureBinary;
-
 import hudson.AbortException;
 import hudson.EnvVars;
 import hudson.Extension;
@@ -30,7 +29,6 @@ import java.util.Collections;
 import java.util.Optional;
 import jenkins.model.Jenkins;
 import jenkins.tasks.SimpleBuildStep;
-import org.kohsuke.stapler.verb.POST;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
@@ -38,6 +36,7 @@ import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.verb.POST;
 
 public class NowSecurePlugin extends Builder implements SimpleBuildStep {
     // Required
@@ -48,16 +47,16 @@ public class NowSecurePlugin extends Builder implements SimpleBuildStep {
     // https://github.com/jenkinsci/credentials-plugin/blob/master/docs/consumer.adoc
     private final String tokenCredentialId;
 
-    private String artifactDir = "nowsecure";
-    private String apiHost = "https://lab-api.nowsecure.com";
-    private String uiHost = "https://app.nowsecure.com";
+    private String artifactDir;
+    private String apiHost;
+    private String uiHost;
     private String nowsecureCIVersion;
 
     private LogLevel logLevel = LogLevel.INFO;
     private AnalysisType analysisType = AnalysisType.STATIC;
 
-    private int minimumScore = -1;
-    private int pollingDurationMinutes = 20;
+    private int minimumScore;
+    private int pollingDurationMinutes;
 
     @DataBoundConstructor
     public NowSecurePlugin(String binaryFilePath, String group, String tokenCredentialId) {
@@ -192,7 +191,6 @@ public class NowSecurePlugin extends Builder implements SimpleBuildStep {
             return FormValidation.ok();
         }
 
-
         @POST // Has to be of the form 'doFill<FieldName>Items'
         public ListBoxModel doFillTokenCredentialIdItems(
                 @AncestorInPath Item item, @QueryParameter String tokenCredentialId) {
@@ -266,48 +264,47 @@ public class NowSecurePlugin extends Builder implements SimpleBuildStep {
         this.pollingDurationMinutes = pollingDurationMinutes;
     }
 
-	public String getBinaryFilePath() {
-		return binaryFilePath;
-	}
+    public String getBinaryFilePath() {
+        return binaryFilePath;
+    }
 
-	public String getGroup() {
-		return group;
-	}
+    public String getGroup() {
+        return group;
+    }
 
-	public String getTokenCredentialId() {
-		return tokenCredentialId;
-	}
+    public String getTokenCredentialId() {
+        return tokenCredentialId;
+    }
 
-	public String getArtifactDir() {
-		return artifactDir;
-	}
+    public String getArtifactDir() {
+        return artifactDir;
+    }
 
-	public String getApiHost() {
-		return apiHost;
-	}
+    public String getApiHost() {
+        return apiHost;
+    }
 
-	public String getUiHost() {
-		return uiHost;
-	}
+    public String getUiHost() {
+        return uiHost;
+    }
 
-	public String getNowsecureCIVersion() {
-		return nowsecureCIVersion;
-	}
+    public String getNowsecureCIVersion() {
+        return nowsecureCIVersion;
+    }
 
-	public LogLevel getLogLevel() {
-		return logLevel;
-	}
+    public LogLevel getLogLevel() {
+        return logLevel;
+    }
 
-	public AnalysisType getAnalysisType() {
-		return analysisType;
-	}
+    public AnalysisType getAnalysisType() {
+        return analysisType;
+    }
 
-	public int getMinimumScore() {
-		return minimumScore;
-	}
+    public int getMinimumScore() {
+        return minimumScore;
+    }
 
-	public int getPollingDurationMinutes() {
-		return pollingDurationMinutes;
-	}
-
+    public int getPollingDurationMinutes() {
+        return pollingDurationMinutes;
+    }
 }

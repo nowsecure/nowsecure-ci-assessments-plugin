@@ -13,19 +13,19 @@
     </f:entry>
     <f:advanced>
         <f:entry title="Artifact Directory" field="artifactDir" description="${%ArtifactDirDesc}">
-            <f:textbox />
+            <f:textbox default="nowsecure"/>
         </f:entry>
         <f:entry title="API Host" field="apiHost" description="${%APIHostDesc}">
-            <f:textbox />
+            <f:textbox default="https://lab-api.nowsecure.com" />
         </f:entry>
         <f:entry title="UI Host" field="uiHost" description="${%UIHostDesc}">
-            <f:textbox />
+            <f:textbox default="https://app.nowsecure.com" />
         </f:entry>
         <f:entry title="Minimum Score" field="minimumScore" description="${%MinimumScoreDesc}">
-            <f:textbox />
+            <f:number min="0" max="100" default="0"/>
         </f:entry>
         <f:entry title="${%Polling Duration (Minutes)}" field="pollingDurationMinutes" description="${%PollingDurationDesc}">
-            <f:textbox />
+            <f:number min="0" default="20"/>
         </f:entry>
         <f:entry title="${%Log Level}" field="logLevel" description="${%LogLevelDesc}">
             <f:enum default="INFO">
